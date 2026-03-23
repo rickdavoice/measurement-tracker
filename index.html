@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measurements Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <h1>Measurements Tracker</h1>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+    <div id="dateAndMeasurement" style="display:flex; align-items:center; gap:12px;">
+      <div id="todayDate" style="font-size:14px; color:#aaa; font-weight:600;"></div>
+    </div>
+    <button id="calendarBtn"
+      style="margin-left:auto; background:#6c3483; color:#fff; border-radius:8px; padding:12px 20px; font-size:18px; border:none; cursor:pointer;">📅</button>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="input-group">
+      <label>Weight (lbs)</label>
+      <input id="weight" placeholder="e.g., 160 1/2">
+    </div>
+
+    <div class="input-group">
+      <label>Forearms (in)</label>
+      <input id="forearms" placeholder="e.g., 12 3/4">
+    </div>
+
+    <div class="input-group">
+      <label>Arms (in)</label>
+      <input id="arms" placeholder="e.g., 14 1/2">
+    </div>
+
+    <div class="input-group">
+      <label>Chest (in)</label>
+      <input id="chest" placeholder="e.g., 40">
+    </div>
+
+    <div class="input-group">
+      <label>Shoulders (in)</label>
+      <input id="shoulders" placeholder="e.g., 46">
+    </div>
+
+    <div class="input-group">
+      <label>Waist (in)</label>
+      <input id="waist" placeholder="e.g., 32">
+    </div>
+
+    <div class="input-group">
+      <label>Butt (in)</label>
+      <input id="butt" placeholder="e.g., 38">
+    </div>
+
+    <button class="save full-width" onclick="saveMeasurement()">Save</button>
+  </div>
+
+  <!-- History -->
+  <h2>History</h2>
+  <div id="historyContainer"></div>
+
+  <!-- Calendar Modal -->
+  <div id="calendarModal" class="calendar-modal">
+    <div class="calendar-modal-content">
+      <div id="closeCalendarModal" class="modal-close">✕</div>
+      <div id="fullCalendar"></div>
+    </div>
+  </div>
+
+  <!-- Graph -->
+  <h2>Graphs</h2>
+  <canvas id="measurementChart"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>
