@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Measurements Tracker</title>
+  <title>Measurement Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c3483">
 </head>
 <body>
-  <!-- test -->
+  <!-- test2 -->
 
-  <h1>Measurements Tracker</h1>
+  <h1>Measurement Tracker</h1>
 
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
     <div id="dateAndMeasurement" style="display:flex; align-items:center; gap:12px;">
@@ -26,37 +28,37 @@
   <div class="card">
     <div class="input-group">
       <label>Weight (lbs)</label>
-      <input id="weight" placeholder="e.g., 160 1/2">
+      <input id="weight">
     </div>
 
     <div class="input-group">
       <label>Forearms (in)</label>
-      <input id="forearms" placeholder="e.g., 12 3/4">
+      <input id="forearms">
     </div>
 
     <div class="input-group">
       <label>Arms (in)</label>
-      <input id="arms" placeholder="e.g., 14 1/2">
+      <input id="arms">
     </div>
 
     <div class="input-group">
       <label>Chest (in)</label>
-      <input id="chest" placeholder="e.g., 40">
+      <input id="chest">
     </div>
 
     <div class="input-group">
       <label>Shoulders (in)</label>
-      <input id="shoulders" placeholder="e.g., 46">
+      <input id="shoulders">
     </div>
 
     <div class="input-group">
       <label>Waist (in)</label>
-      <input id="waist" placeholder="e.g., 32">
+      <input id="waist">
     </div>
 
     <div class="input-group">
       <label>Butt (in)</label>
-      <input id="butt" placeholder="e.g., 38">
+      <input id="butt">
     </div>
 
     <button class="save full-width" onclick="saveMeasurement()">Save</button>
@@ -67,7 +69,8 @@
   <div id="historyContainer"></div>
 
   <!-- Calendar Modal -->
-  <div id="calendarModal" class="calendar-modal">
+  <div id="calendarModal" class="calendar-modal"div id="calendarModal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000a; z-index:1000; justify-content:center; align-items:center;">
     <div class="calendar-modal-content">
       <div id="closeCalendarModal" class="modal-close">✕</div>
       <div id="fullCalendar"></div>
