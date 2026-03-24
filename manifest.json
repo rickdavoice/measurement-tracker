@@ -1,6 +1,6 @@
 {
   "name": "Measurement Tracker",
-  "short_name": "Tracker",
+  "short_name": "Measurement",
   "start_url": "/measurement-tracker/",
   "display": "standalone",
   "background_color": "#181a1b",
@@ -8,7 +8,7 @@
   "icons": [
     {
      "src": "icon.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
