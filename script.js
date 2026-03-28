@@ -58,9 +58,11 @@ async function saveMeasurement() {
 
   try {
     await db.collection("measurements").add(measurement);
-    loadHistory(currentDate);
-    renderGraph();
-    renderCalendar();
+
+loadHistory(currentDate);   // form fields
+loadLatestHistory();        // 🔥 THIS WAS MISSING
+renderGraph();
+renderCalendar();
     alert("Saved!");
   } catch(e) {
     console.error("Save failed:", e);
@@ -72,29 +74,41 @@ async function loadHistory(filterDate = null) {
   const snapshot = await db.collection("measurements").orderBy("date","desc").get();
   const docs = snapshot.docs.map(doc => doc.data());
 
-  const filteredDocs = filterDate ? docs.filter(d => d.date.trim() === filterDate) : docs;
+  const filteredDocs = filterDate 
+    ? docs.filter(d => d.date.trim() === filterDate) 
+    : docs;
 
-  if(filteredDocs.length === 0){
-    historyContainer.innerHTML = '<p>No measurements for this day.</p>';
+  // --- FORM FIELDS (selected date only) ---
+  if(filteredDocs.length > 0){
+    const selectedData = filteredDocs[0];
 
-    // Clear input fields if no data
+    ["weight","forearms","arms","chest","shoulders","waist","butt"].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = selectedData[id] ?? '';
+    });
+  } else {
     ["weight","forearms","arms","chest","shoulders","waist","butt"].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.value = '';
     });
+  }
 
+  
+}
+async function loadLatestHistory() {
+  const snapshot = await db.collection("measurements")
+    .orderBy("date","desc")
+    .limit(1)
+    .get();
+
+  if(snapshot.empty){
+    historyContainer.innerHTML = '<p>No measurements yet.</p>';
     return;
   }
 
-  // Populate inputs with the first measurement of the day
-  const todayData = filteredDocs[0];
-  ["weight","forearms","arms","chest","shoulders","waist","butt"].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = todayData[id] ?? '';
-  });
+  const d = snapshot.docs[0].data();
 
-  // Render history below
-  historyContainer.innerHTML = filteredDocs.map(d => `
+  historyContainer.innerHTML = `
     <div class="history-day">
       <div class="history-row"><strong>${d.date}</strong></div>
       <div class="history-row">Weight: ${d.weight} lbs</div>
@@ -105,8 +119,9 @@ async function loadHistory(filterDate = null) {
       <div class="history-row">Waist: ${d.waist}"</div>
       <div class="history-row">Butt: ${d.butt}"</div>
     </div>
-  `).join('');
+  `;
 }
+
 
 // --- Graph ---
 async function renderGraph() {
@@ -201,7 +216,10 @@ async function renderCalendar() {
   fullCalendar.querySelectorAll('.full-calendar-day[data-date]').forEach(el => {
     el.onclick = () => {
       currentDate = el.dataset.date;
-      todayDateEl.textContent = new Date(currentDate).toLocaleDateString();
+      const [year, month, day] = currentDate.split('-').map(Number);
+const localDate = new Date(year, month - 1, day);
+
+todayDateEl.textContent = localDate.toLocaleDateString();
       document.getElementById('calendarModal').style.display = 'none';
 
       loadHistory(currentDate);
@@ -230,7 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  loadHistory(currentDate);
+  loadHistory(currentDate);     // form fields
+  loadLatestHistory();          // history section
   renderGraph();
 });
 
