@@ -184,7 +184,7 @@ button.save:active {
 }
 
 
-..calendar-modal {
+.calendar-modal {
   display: flex;
   position: fixed;
   top: 0;

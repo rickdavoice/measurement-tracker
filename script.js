@@ -282,10 +282,16 @@ async function renderCalendar() {
     const isSelected = dateStr === currentDate;
     const hasData = measurementDates.includes(dateStr);
 
+    let styleStr = 'position:relative;';
+    if (isSelected) {
+      styleStr += 'background:#6c3483;color:white;border-radius:6px;';
+    } else if (isToday) {
+      styleStr += 'background:#3a3a3a;color:white;border-radius:6px;';
+    }
+
     html += `
       <div class="full-calendar-day" data-date="${dateStr}" 
-           style="position:relative;
-                  ${isToday || isSelected ? 'background:#6c3483;color:white;border-radius:6px;' : ''}">
+           style="${styleStr}">
         <p style="margin:0;padding:0;text-align:center;">${d}</p>
         ${hasData ? '<div style="width:6px;height:6px;background:#2ecc71;border-radius:50%;position:absolute;top:4px;right:1px;transform:translateX(-50%)"></div>' : ''}
       </div>
