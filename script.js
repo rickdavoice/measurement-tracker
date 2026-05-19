@@ -26,6 +26,7 @@ let calendarYear = new Date().getFullYear();
 // --- DOM ---
 const todayDateEl = document.getElementById("todayDate");
 const historyContainer = document.getElementById("historyContainer");
+const measurementHistoryPanel = document.getElementById("measurementHistoryPanel");
 todayDateEl.textContent = new Date().toLocaleDateString();
 
 // --- Utility to parse fractions ---
@@ -40,6 +41,63 @@ function parseFraction(input) {
     const [num, denom] = input.split('/');
     return parseFloat(num)/parseFloat(denom);
   } else return parseFloat(input);
+}
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function formatMeasurementValue(value, unit = '') {
+  if (value === null || value === undefined || value === '') return '-';
+  const number = Number(value);
+  if (Number.isNaN(number)) return String(value) + unit;
+
+  const sign = number < 0 ? -1 : 1;
+  const absValue = Math.abs(number);
+  const whole = Math.floor(absValue);
+  const fraction = absValue - whole;
+  if (fraction < 1e-8) {
+    return `${sign * whole}${unit}`;
+  }
+
+  let bestNum = 0;
+  let bestDen = 1;
+  let bestError = Infinity;
+  const maxDenominator = 16;
+
+  for (let den = 1; den <= maxDenominator; den++) {
+    const num = Math.round(fraction * den);
+    const error = Math.abs(fraction - num / den);
+    if (error < bestError) {
+      bestError = error;
+      bestNum = num;
+      bestDen = den;
+    }
+  }
+
+  if (bestNum === 0) {
+    return `${sign * whole}${unit}`;
+  }
+
+  if (bestNum === bestDen) {
+    return `${sign * (whole + 1)}${unit}`;
+  }
+
+  const divisor = gcd(bestNum, bestDen);
+  bestNum /= divisor;
+  bestDen /= divisor;
+  const formattedFraction = `${bestNum}/${bestDen}`;
+  const prefix = sign < 0 ? '-' : '';
+  const wholePart = whole > 0 ? `${whole} ` : '';
+
+  return `${prefix}${wholePart}${formattedFraction}${unit}`;
+}
+
+function formatMeasurementHistoryValue(key, value, unit = '') {
+  if (key === 'weight') {
+    return value === null || value === undefined || value === '' ? '-' : `${value}${unit}`;
+  }
+  return formatMeasurementValue(value, unit);
 }
 
 // --- Save Measurement ---
@@ -93,8 +151,32 @@ async function loadHistory(filterDate = null) {
     });
   }
 
-  
 }
+
+async function loadMeasurementHistory(key, unit, label) {
+  const snapshot = await db.collection("measurements").orderBy("date","desc").get();
+  const docs = snapshot.docs.map(doc => doc.data());
+
+  if (!docs.length) {
+    document.getElementById('measurementHistoryModal').style.display = 'none';
+    return;
+  }
+
+  const rows = docs.map(d => `
+      <div class="history-row">
+        <span>${d.date}</span>
+        <span>${formatMeasurementHistoryValue(key, d[key], unit)}</span>
+      </div>
+    `).join('');
+
+  measurementHistoryPanel.innerHTML = `
+    <div class="history-day">
+      <div class="history-row"><strong>${label} history</strong></div>
+      ${rows}
+    </div>`;
+  document.getElementById('measurementHistoryModal').style.display = 'flex';
+}
+
 async function loadLatestHistory() {
   const snapshot = await db.collection("measurements")
     .orderBy("date","desc")
@@ -103,6 +185,7 @@ async function loadLatestHistory() {
 
   if(snapshot.empty){
     historyContainer.innerHTML = '<p>No measurements yet.</p>';
+    document.getElementById('measurementHistoryModal').style.display = 'none';
     return;
   }
 
@@ -111,45 +194,18 @@ async function loadLatestHistory() {
   historyContainer.innerHTML = `
     <div class="history-day">
       <div class="history-row"><strong>${d.date}</strong></div>
-      <div class="history-row">Weight: ${d.weight} lbs</div>
-      <div class="history-row">Forearms: ${d.forearms}"</div>
-      <div class="history-row">Arms: ${d.arms}"</div>
-      <div class="history-row">Chest: ${d.chest}"</div>
-      <div class="history-row">Shoulders: ${d.shoulders}"</div>
-      <div class="history-row">Waist: ${d.waist}"</div>
-      <div class="history-row">Butt: ${d.butt}"</div>
+      <div class="history-row"><span>Weight</span><span>${formatMeasurementHistoryValue('weight', d.weight, ' lbs')}</span></div>
+      <div class="history-row"><span>Forearms</span><span>${formatMeasurementHistoryValue('forearms', d.forearms, '"')}</span></div>
+      <div class="history-row"><span>Arms</span><span>${formatMeasurementHistoryValue('arms', d.arms, '"')}</span></div>
+      <div class="history-row"><span>Chest</span><span>${formatMeasurementHistoryValue('chest', d.chest, '"')}</span></div>
+      <div class="history-row"><span>Shoulders</span><span>${formatMeasurementHistoryValue('shoulders', d.shoulders, '"')}</span></div>
+      <div class="history-row"><span>Waist</span><span>${formatMeasurementHistoryValue('waist', d.waist, '"')}</span></div>
+      <div class="history-row"><span>Butt</span><span>${formatMeasurementHistoryValue('butt', d.butt, '"')}</span></div>
     </div>
   `;
 }
 
 
-// --- Graph ---
-async function renderGraph() {
-  const snapshot = await db.collection("measurements").orderBy("date").get();
-  const docs = snapshot.docs.map(doc => doc.data());
-
-  const labels = docs.map(d => d.date);
-  const dataSets = ["weight","forearms","arms","chest","shoulders","waist","butt"].map((key,i) => ({
-    label: key,
-    data: docs.map(d => d[key]),
-    borderColor: ["#6c3483","#2ecc71","#3498db","#e67e22","#e74c3c","#f1c40f","#9b59b6"][i],
-    backgroundColor: "transparent",
-    tension: 0.2
-  }));
-
-  const ctx = document.getElementById("measurementChart").getContext("2d");
-  if(window.chartInstance) window.chartInstance.destroy();
-
-  window.chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets: dataSets },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom' } },
-      scales: { y: { beginAtZero: false } }
-    }
-  });
-}
 
 // --- Calendar ---
 async function renderCalendar() {
@@ -247,6 +303,26 @@ document.addEventListener('DOMContentLoaded', () => {
       calendarModal.style.display = 'none';
     };
   }
+
+  const closeHistoryModal = document.getElementById('closeMeasurementHistoryModal');
+  const historyModal = document.getElementById('measurementHistoryModal');
+  if (closeHistoryModal) {
+    closeHistoryModal.onclick = () => {
+      historyModal.style.display = 'none';
+    };
+  }
+
+  historyModal.onclick = (event) => {
+    if (event.target === historyModal) {
+      historyModal.style.display = 'none';
+    }
+  };
+
+  document.querySelectorAll('.input-group.history-trigger label').forEach(label => {
+    const parent = label.parentElement;
+    if (!parent) return;
+    label.onclick = () => loadMeasurementHistory(parent.dataset.key, parent.dataset.unit, parent.dataset.label);
+  });
 
   loadHistory(currentDate);     // form fields
   loadLatestHistory();          // history section

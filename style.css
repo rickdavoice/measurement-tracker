@@ -64,6 +64,26 @@ button.save:active {
   font-size: 14px;
 }
 
+.history-clickable {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-clickable:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.input-group.history-trigger label {
+  cursor: pointer;
+}
+
+.hint {
+  color: #bbb;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
 .modal-close {
   position: absolute;
   top: -10px;
@@ -78,6 +98,30 @@ button.save:active {
   justify-content: center;
   font-size: 18px;
   cursor: pointer;
+}
+
+.history-modal {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000a;
+  z-index: 1100;
+  justify-content: center;
+  align-items: center;
+}
+
+.history-modal-content {
+  background: #23272a;
+  border-radius: 18px;
+  padding: 24px 22px;
+  box-shadow: 0 8px 32px #0006;
+  min-width: 320px;
+  max-width: 90vw;
+  width: min(500px, 90vw);
+  position: relative;
 }
 
 

@@ -26,37 +26,37 @@
 
   <!-- Input Card -->
   <div class="card">
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="weight" data-label="Weight" data-unit=" lbs">
       <label>Weight (lbs)</label>
       <input id="weight">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="forearms" data-label="Forearms" data-unit='"'>
       <label>Forearms (in)</label>
       <input id="forearms">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="arms" data-label="Arms" data-unit='"'>
       <label>Arms (in)</label>
       <input id="arms">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="chest" data-label="Chest" data-unit='"'>
       <label>Chest (in)</label>
       <input id="chest">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="shoulders" data-label="Shoulders" data-unit='"'>
       <label>Shoulders (in)</label>
       <input id="shoulders">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="waist" data-label="Waist" data-unit='"'>
       <label>Waist (in)</label>
       <input id="waist">
     </div>
 
-    <div class="input-group">
+    <div class="input-group history-trigger" data-key="butt" data-label="Butt" data-unit='"'>
       <label>Butt (in)</label>
       <input id="butt">
     </div>
@@ -65,21 +65,25 @@
   </div>
 
   <!-- History -->
-  <h2>History</h2>
+  <h2>Last Measurement</h2>
   <div id="historyContainer"></div>
 
+  <!-- Measurement History Modal -->
+  <div id="measurementHistoryModal" class="history-modal" style="display:none;">
+    <div class="history-modal-content">
+      <div id="closeMeasurementHistoryModal" class="modal-close">✕</div>
+      <div id="measurementHistoryPanel"></div>
+    </div>
+  </div>
+
   <!-- Calendar Modal -->
-  <div id="calendarModal" class="calendar-modal"div id="calendarModal"
+  <div id="calendarModal" class="calendar-modal"
         style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000a; z-index:1000; justify-content:center; align-items:center;">
     <div class="calendar-modal-content">
       <div id="closeCalendarModal" class="modal-close">✕</div>
       <div id="fullCalendar"></div>
     </div>
   </div>
-
-  <!-- Graph -->
-  <h2>Graphs</h2>
-  <canvas id="measurementChart"></canvas>
 
   <script src="script.js"></script>
 </body>
