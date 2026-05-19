@@ -19,6 +19,18 @@ function getLocalYYYYMMDD(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+function formatDisplayDate(dateString) {
+  if (!dateString) return '';
+  const parts = dateString.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return dateString;
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
 let currentDate = getLocalYYYYMMDD();
 let calendarMonth = new Date().getMonth(); // 0-11
 let calendarYear = new Date().getFullYear();
@@ -27,7 +39,7 @@ let calendarYear = new Date().getFullYear();
 const todayDateEl = document.getElementById("todayDate");
 const historyContainer = document.getElementById("historyContainer");
 const measurementHistoryPanel = document.getElementById("measurementHistoryPanel");
-todayDateEl.textContent = new Date().toLocaleDateString();
+todayDateEl.textContent = formatDisplayDate(currentDate);
 
 // --- Utility to parse fractions ---
 function parseFraction(input) {
@@ -164,7 +176,7 @@ async function loadMeasurementHistory(key, unit, label) {
 
   const rows = docs.map(d => `
       <div class="history-row">
-        <span>${d.date}</span>
+        <span>${formatDisplayDate(d.date)}</span>
         <span>${formatMeasurementHistoryValue(key, d[key], unit)}</span>
       </div>
     `).join('');
@@ -193,7 +205,7 @@ async function loadLatestHistory() {
 
   historyContainer.innerHTML = `
     <div class="history-day">
-      <div class="history-row"><strong>${d.date}</strong></div>
+      <div class="history-row"><strong>${formatDisplayDate(d.date)}</strong></div>
       <div class="history-row"><span>Weight</span><span>${formatMeasurementHistoryValue('weight', d.weight, ' lbs')}</span></div>
       <div class="history-row"><span>Forearms</span><span>${formatMeasurementHistoryValue('forearms', d.forearms, '"')}</span></div>
       <div class="history-row"><span>Arms</span><span>${formatMeasurementHistoryValue('arms', d.arms, '"')}</span></div>
@@ -203,6 +215,33 @@ async function loadLatestHistory() {
       <div class="history-row"><span>Butt</span><span>${formatMeasurementHistoryValue('butt', d.butt, '"')}</span></div>
     </div>
   `;
+}
+
+async function renderGraph() {
+  const snapshot = await db.collection("measurements").orderBy("date").get();
+  const docs = snapshot.docs.map(doc => doc.data());
+
+  const labels = docs.map(d => formatDisplayDate(d.date));
+  const dataSets = ["weight","forearms","arms","chest","shoulders","waist","butt"].map((key,i) => ({
+    label: key,
+    data: docs.map(d => d[key]),
+    borderColor: ["#6c3483","#2ecc71","#3498db","#e67e22","#e74c3c","#f1c40f","#9b59b6"][i],
+    backgroundColor: "transparent",
+    tension: 0.2
+  }));
+
+  const ctx = document.getElementById("measurementChart").getContext("2d");
+  if (window.chartInstance) window.chartInstance.destroy();
+
+  window.chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: dataSets },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: false } }
+    }
+  });
 }
 
 
@@ -275,7 +314,7 @@ async function renderCalendar() {
       const [year, month, day] = currentDate.split('-').map(Number);
 const localDate = new Date(year, month - 1, day);
 
-todayDateEl.textContent = localDate.toLocaleDateString();
+todayDateEl.textContent = formatDisplayDate(currentDate);
       document.getElementById('calendarModal').style.display = 'none';
 
       loadHistory(currentDate);
@@ -318,10 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  document.querySelectorAll('.input-group.history-trigger label').forEach(label => {
-    const parent = label.parentElement;
-    if (!parent) return;
-    label.onclick = () => loadMeasurementHistory(parent.dataset.key, parent.dataset.unit, parent.dataset.label);
+  document.querySelectorAll('.input-group.history-trigger').forEach(group => {
+    group.onclick = (event) => {
+      if (event.target.tagName.toLowerCase() === 'input') return;
+      const key = group.dataset.key;
+      const unit = group.dataset.unit;
+      const label = group.dataset.label;
+      loadMeasurementHistory(key, unit, label);
+    };
   });
 
   loadHistory(currentDate);     // form fields
