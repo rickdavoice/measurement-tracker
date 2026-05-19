@@ -261,10 +261,10 @@ async function renderCalendar() {
 
   // Header with month navigation
   let html = `
-    <div class="full-calendar-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <button class="cal-nav" id="prevMonth">←</button>
-      <div>${firstDay.toLocaleString('default', { month: 'long' })} ${calendarYear}</div>
-      <button class="cal-nav" id="nextMonth">→</button>
+    <div class="full-calendar-header">
+      <button class="cal-nav" id="prevMonth">&lt;</button>
+      <span>${firstDay.toLocaleString('default', { month: 'long' })} ${calendarYear}</span>
+      <button class="cal-nav" id="nextMonth">&gt;</button>
     </div>
     <div class="full-calendar-grid">
   `;

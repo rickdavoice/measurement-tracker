@@ -184,7 +184,7 @@ button.save:active {
 }
 
 
-.calendar-modal {
+..calendar-modal {
   display: flex;
   position: fixed;
   top: 0;
@@ -197,6 +197,7 @@ button.save:active {
   align-items: center;
 }
 .calendar-modal-content {
+  position: relative;
   background: #23272a;
   border-radius: 18px;
   padding: 32px 24px;
